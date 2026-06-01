@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://i.imgur.com/uC5UjXo.png" alt="ThroughU Homepage" width="100%" />
+  <img src="./client/public/hero_dark.png" alt="ThroughU Homepage" width="100%" />
 
   # 🩸 ThroughU — Turning Loss Into Hope
 
