@@ -1,6 +1,11 @@
 import axios from 'axios';
 
-const API = axios.create({ baseURL: process.env.REACT_APP_API_URL || '/api' });
+let baseURL = process.env.REACT_APP_API_URL || '/api';
+if (baseURL !== '/api') {
+  if (!baseURL.startsWith('http')) baseURL = 'https://' + baseURL;
+  if (!baseURL.endsWith('/api')) baseURL = baseURL.replace(/\/$/, '') + '/api';
+}
+const API = axios.create({ baseURL });
 
 API.interceptors.request.use(cfg => {
   const t = localStorage.getItem('cly_token');
