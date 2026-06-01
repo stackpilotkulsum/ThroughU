@@ -44,7 +44,9 @@ const startServer = async () => {
 
     if (!mongoUri) {
       const { MongoMemoryServer } = require('mongodb-memory-server');
-      const mongoServer = await MongoMemoryServer.create();
+      const mongoServer = await MongoMemoryServer.create({
+        binary: { version: '7.0.14' }
+      });
       mongoUri = mongoServer.getUri();
       console.log('⚠️ Using In-Memory MongoDB (No external database connection required!)');
     }
