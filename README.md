@@ -8,7 +8,6 @@
   [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
   [![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
   [![Express.js](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
-  [![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 </div>
 
 <br />
@@ -35,7 +34,6 @@
 
 ### Backend
 * **Core:** Node.js, Express.js
-* **Database:** MongoDB, Mongoose, MongoMemoryServer (for instant prototyping)
 * **Auth & Security:** JWT (JSON Web Tokens), Bcrypt.js, CORS
 
 ---
@@ -52,7 +50,6 @@ cd server
 npm install
 npm run dev
 ```
-*(Note: The backend is pre-configured to use an in-memory MongoDB database so you don't need a local Mongo instance to start testing!)*
 
 ### 3. Frontend Setup
 ```bash
@@ -80,10 +77,9 @@ REACT_APP_TOMTOM_API_KEY=your_tomtom_api_key
 REACT_APP_API_URL=http://localhost:5000/api
 ```
 
-**`server/.env`** (Optional — uses memory-server by default)
+**`server/.env`** (Optional)
 ```env
 PORT=5000
-MONGO_URI=mongodb://localhost:27017/throughu
 JWT_SECRET=your_super_secret_key
 JWT_EXPIRE=7d
 ```
