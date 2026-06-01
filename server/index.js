@@ -37,15 +37,26 @@ app.use((err, req, res, next) => {
 
 // ── Connect DB & start ──────────────────────────────────────
 const PORT = process.env.PORT || 5000;
-mongoose
-  .connect(process.env.MONGO_URI || 'mongodb://localhost:27017/throughu')
-  .then(() => {
+
+const startServer = async () => {
+  try {
+    let mongoUri = process.env.MONGO_URI;
+
+    if (!mongoUri) {
+      const { MongoMemoryServer } = require('mongodb-memory-server');
+      const mongoServer = await MongoMemoryServer.create();
+      mongoUri = mongoServer.getUri();
+      console.log('⚠️ Using In-Memory MongoDB (No external database connection required!)');
+    }
+
+    await mongoose.connect(mongoUri);
     console.log('✅ MongoDB connected');
-    app.listen(PORT, () =>
-      console.log(`🚀 Server → http://localhost:${PORT}`)
-    );
-  })
-  .catch(err => {
+    
+    app.listen(PORT, () => console.log(`🚀 Server → http://localhost:${PORT}`));
+  } catch (err) {
     console.error('❌ DB Error:', err.message);
     process.exit(1);
-  });
+  }
+};
+
+startServer();

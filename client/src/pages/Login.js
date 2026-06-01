@@ -5,21 +5,11 @@ import { GoogleLogin } from '@react-oauth/google';
 import toast from 'react-hot-toast';
 
 const PANEL_STYLE = {
-  minHeight: '100vh', display: 'flex', alignItems: 'stretch',
-  background: '#fff1f2',
+  minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+  background: `linear-gradient(165deg, rgba(255, 228, 230,0.65) 0%, rgba(255, 228, 230,0.45) 40%, rgba(255, 228, 230,0.75) 100%), url('/hero_dark.png') center/cover no-repeat fixed`,
+  padding: '2rem',
 };
-const LEFT_STYLE = {
-  flex: '0 0 44%', background: 'linear-gradient(160deg, #fff1f2, #ffe4e6)',
-  display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
-  padding: '5rem 3.5rem', position: 'relative', overflow: 'hidden',
-  borderRight: '1px solid rgba(225, 29, 72, 0.15)'
-};
-const RIGHT_STYLE = {
-  flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
-  padding: '3rem 2rem', background: '#fff1f2',
-  position: 'relative'
-};
-const BOX_STYLE = { width: '100%', maxWidth: '420px', position: 'relative', zIndex: 2 };
+const BOX_STYLE = { width: '100%', maxWidth: '500px', position: 'relative', zIndex: 2 };
 
 export function Login() {
   const { login, googleLogin } = useAuth();
@@ -47,33 +37,9 @@ export function Login() {
 
   return (
     <div style={PANEL_STYLE}>
-      {/* Left */}
-      <div style={LEFT_STYLE} className="login-left-panel">
-        <div style={{ position:'absolute', inset:0, background:'radial-gradient(ellipse 70% 60% at 20% 40%, rgba(34,211,238,0.12) 0%, transparent 65%)', pointerEvents:'none' }}/>
-        <div className="brand-lockup" style={{ fontSize:'1.5rem', position:'relative', zIndex:1 }}>
-          <span className="brand-symbol" style={{ fontSize:'0.7rem' }} aria-hidden="true" />
-          <span className="brand-name">Through<span className="brand-smile-u">U</span></span>
-        </div>
-        <div style={{ position:'relative', zIndex:1 }}>
-          <h2 style={{ fontSize:'3rem', color:'#4c0519', fontWeight: 900, lineHeight:1.1, marginBottom:'1.5rem', letterSpacing:0 }}>
-            Your legacy,<br/><em className="text-coral-gradient" style={{ fontStyle:'italic' }}>always</em><br/>within reach.
-          </h2>
-          <p style={{ color:'var(--text-secondary)', lineHeight:1.8, fontSize:'1.05rem', fontWeight:500 }}>India's most innovative blood & organ donation platform — turning loss into hope.</p>
-        </div>
-        <div style={{ position:'relative', zIndex:1 }}>
-          {['🩸 Online doctor consultations in Hindi & English','🚑 One-tap emergency ambulance request','🗺️ Live impact & donor finder map','🔐 Secure, end-to-end encrypted dashboard'].map(t=>(
-            <div key={t} style={{ display:'flex', alignItems:'center', gap:'12px', color:'var(--text-secondary)', fontSize:'0.9rem', marginBottom:'0.8rem', fontWeight:600 }}>
-              <div style={{ width:'36px', height:'36px', borderRadius:'10px', background:'rgba(225, 29, 72, 0.04)', border:'1px solid rgba(225, 29, 72, 0.18)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'1rem', flexShrink:0, boxShadow:'0 8px 20px rgba(0,0,0,0.2)' }}>{t.slice(0,2)}</div>
-              {t.slice(3)}
-            </div>
-          ))}
-        </div>
-      </div>
-      {/* Right */}
-      <div style={RIGHT_STYLE}>
-        {/* Glow orb */}
-        <div style={{ position:'absolute', right: '5%', bottom: '5%', width: '300px', height: '300px', background: 'rgba(34,211,238,0.05)', borderRadius: '50%', filter: 'blur(80px)', pointerEvents: 'none' }} />
-        
+      {/* Glow orb */}
+      <div style={{ position:'absolute', right: '5%', bottom: '5%', width: '300px', height: '300px', background: 'rgba(34,211,238,0.05)', borderRadius: '50%', filter: 'blur(80px)', pointerEvents: 'none' }} />
+      
         <div style={BOX_STYLE} className="glass-panel login-card" style={{ ...BOX_STYLE, padding: '2.5rem', borderRadius: '24px' }}>
           <h1 style={{ fontSize:'2rem', fontWeight: 900, marginBottom:'0.5rem', color:'#4c0519' }}>Welcome back</h1>
           <p style={{ color:'var(--text-secondary)', fontSize:'0.9rem', marginBottom:'2rem' }}>
@@ -81,14 +47,15 @@ export function Login() {
           </p>
           
           <div style={{ display:'flex', justifyContent:'center', marginBottom:'2rem' }}>
-            <GoogleLogin
-              onSuccess={handleGoogleSuccess}
-              onError={() => toast.error('Google Sign-In was unsuccessful')}
-              theme="filled_black"
-              shape="pill"
-              size="large"
-              text="continue_with"
-            />
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => toast.error('Google Sign-In was unsuccessful')}
+                theme="filled_black"
+                shape="pill"
+                size="large"
+                text="continue_with"
+                width="400"
+              />
           </div>
 
           <div style={{ display:'flex', alignItems:'center', gap:'1rem', marginBottom:'2rem' }}>
@@ -111,7 +78,6 @@ export function Login() {
             </button>
           </form>
         </div>
-      </div>
     </div>
   );
 }
@@ -164,29 +130,7 @@ export function Register() {
 
   return (
     <div style={PANEL_STYLE}>
-      <div style={LEFT_STYLE} className="login-left-panel">
-        <div style={{ position:'absolute', inset:0, background:'radial-gradient(ellipse 70% 60% at 20% 40%, rgba(20,184,166,0.12) 0%, transparent 65%)', pointerEvents:'none' }}/>
-        <div className="brand-lockup" style={{ fontSize:'1.4rem', position:'relative', zIndex:1 }}>
-          <span className="brand-symbol" style={{ fontSize:'0.6rem' }} aria-hidden="true" />
-          <span className="brand-name">Through<span className="brand-smile-u">U</span></span>
-        </div>
-        <div style={{ position:'relative', zIndex:1 }}>
-          <h2 style={{ fontSize:'3rem', color:'#4c0519', fontWeight: 900, lineHeight:1.1, marginBottom:'1.5rem', letterSpacing:0 }}>
-            Create your<br/><em className="text-brand-gradient" style={{ fontStyle:'italic' }}>legacy</em><br/>profile.
-          </h2>
-          <p style={{ color:'var(--text-secondary)', lineHeight:1.8, fontSize:'1.05rem', fontWeight:500 }}>Set up your ThroughU account in minutes. Secure, private, and always accessible.</p>
-        </div>
-        <div style={{ position:'relative', zIndex:1 }}>
-          {['🔒 End-to-end encrypted health data','📴 Works offline for critical info','🌐 Hindi & English support','🆓 Completely free to use'].map(t=>(
-            <div key={t} style={{ color:'var(--text-secondary)', fontSize:'0.9rem', marginBottom:'0.8rem', fontWeight:600, display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{ width:'36px', height:'36px', borderRadius:'10px', background:'rgba(225, 29, 72, 0.04)', border:'1px solid rgba(225, 29, 72, 0.18)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'1rem', flexShrink:0 }}>{t.slice(0,2)}</div>
-              {t.slice(3)}
-            </div>
-          ))}
-        </div>
-      </div>
-      <div style={{ ...RIGHT_STYLE, alignItems:'flex-start', overflowY:'auto', paddingTop:'5rem' }}>
-        <div style={{ position:'absolute', right: '5%', top: '5%', width: '350px', height: '350px', background: 'rgba(20,184,166,0.05)', borderRadius: '50%', filter: 'blur(80px)', pointerEvents: 'none' }} />
+      <div style={{ position:'absolute', right: '5%', top: '5%', width: '350px', height: '350px', background: 'rgba(20,184,166,0.05)', borderRadius: '50%', filter: 'blur(80px)', pointerEvents: 'none' }} />
 
         <div style={{ ...BOX_STYLE, padding: '2.5rem', borderRadius: '24px' }} className="glass-panel login-card">
           {/* Step indicator */}
@@ -209,6 +153,7 @@ export function Register() {
                   shape="pill"
                   size="large"
                   text="signup_with"
+                  width="400"
                 />
               </div>
 
@@ -288,7 +233,6 @@ export function Register() {
             </form>
           )}
         </div>
-      </div>
     </div>
   );
 }

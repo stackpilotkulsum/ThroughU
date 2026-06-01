@@ -6,6 +6,39 @@ import toast from 'react-hot-toast';
 const BLOOD_GROUPS = ['A+','A-','B+','B-','O+','O-','AB+','AB-'];
 const URGENCY_OPTS = ['critical','urgent','normal'];
 
+const BG_IMAGES = [
+  "https://images.unsplash.com/photo-1579154204601-01588f351e67?auto=format&fit=crop&w=400&q=80",
+  "https://images.unsplash.com/photo-1582719478250-c8940acbc80a?auto=format&fit=crop&w=400&q=80",
+  "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=400&q=80",
+  "https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?auto=format&fit=crop&w=400&q=80",
+  "https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=400&q=80",
+  "https://images.unsplash.com/photo-1551076805-e18690c5e561?auto=format&fit=crop&w=400&q=80",
+  "https://images.unsplash.com/photo-1584036561566-baf8f5f1b144?auto=format&fit=crop&w=400&q=80",
+  "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=400&q=80",
+  "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=400&q=80",
+  "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=400&q=80",
+  "https://images.unsplash.com/photo-1526256262350-7da7584cf5eb?auto=format&fit=crop&w=400&q=80",
+  "https://images.unsplash.com/photo-1581595220892-b0739db3ba8c?auto=format&fit=crop&w=400&q=80",
+  "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=400&q=80",
+  "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?auto=format&fit=crop&w=400&q=80",
+  "https://images.unsplash.com/photo-1631815589968-fdb09a223b1e?auto=format&fit=crop&w=400&q=80"
+];
+
+const FloatingCollage = () => (
+  <div style={{ position: 'absolute', inset: '-20%', zIndex: 0, overflow: 'hidden', pointerEvents: 'none', opacity: 0.55 }}>
+    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, transparent 0%, rgba(255,228,230,0.8) 100%)', zIndex: 2 }} />
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '1.5rem', transform: 'rotate(8deg) scale(1.1)', width: '100%', height: '100%', placeItems: 'center' }}>
+      {BG_IMAGES.map((src, i) => (
+        <img key={i} src={src} alt="" style={{ 
+           width: '100%', height: i%2===0 ? '340px' : '220px', objectFit: 'cover', borderRadius: '16px',
+           transform: `translateY(${i%3===0 ? '60px' : i%3===1 ? '-40px' : '0'})`,
+           boxShadow: '0 20px 40px rgba(0,0,0,0.4)', filter: 'brightness(0.4) contrast(1.2)'
+        }} />
+      ))}
+    </div>
+  </div>
+);
+
 export default function BloodFinder() {
   const loc = useLocation();
   const [requests, setRequests] = useState([]);
@@ -54,7 +87,9 @@ export default function BloodFinder() {
   const setF = k => v => setFilters(p => ({ ...p, [k]: p[k]===v ? '' : v }));
 
   return (
-    <div className="page-wrapper" style={{ overflow: 'hidden' }}>
+    <div className="page-wrapper" style={{ overflow: 'hidden', position: 'relative' }}>
+      <FloatingCollage />
+      
       {/* Background orbs */}
       <div className="hero-orb hero-orb-1" style={{ opacity: 0.7 }} />
       <div className="hero-orb hero-orb-2" style={{ opacity: 0.5 }} />
@@ -62,7 +97,9 @@ export default function BloodFinder() {
       {/* Hero strip */}
       <div style={{ padding:'5rem 0 3rem', position:'relative', zIndex: 2 }}>
         <div className="container">
-          <div className="section-tag">Blood Finder</div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '4rem', alignItems: 'center' }}>
+            <div>
+              <div className="section-tag">Blood Finder</div>
           <h1 style={{ fontSize:'clamp(2.5rem,5vw,4rem)', fontWeight: 900, marginBottom:'1rem', lineHeight:1.1 }}>
             Find Blood. <span className="text-coral-gradient">Save Lives.</span>
           </h1>
@@ -97,6 +134,12 @@ export default function BloodFinder() {
                 </button>
               );
             })}
+          </div>
+          </div>
+          <div className="fade-up" style={{ position: 'relative' }}>
+             <div style={{ position: 'absolute', inset: '-10%', background: 'radial-gradient(circle, rgba(248,113,113,0.12) 0%, transparent 60%)', zIndex: -1 }} />
+             <img src="https://images.unsplash.com/photo-1615461066841-6116e61058f4?auto=format&fit=crop&w=1000&q=80" alt="Giving Blood" style={{ width: '100%', borderRadius: '24px', boxShadow: '0 20px 40px rgba(225, 29, 72, 0.15)', objectFit: 'cover', border: '1px solid rgba(225,29,72,0.1)' }} />
+          </div>
           </div>
         </div>
       </div>

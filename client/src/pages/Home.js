@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { bloodAPI } from '../utils/api';
+import { QuickDashboardWidget } from '../components/QuickDashboardWidget';
 
 const BLOOD_GROUPS = ['A+','A-','B+','B-','O+','O-','AB+','AB-'];
 
@@ -107,90 +108,12 @@ export default function Home() {
                 </Link>
               </div>
 
-              {/* Stats */}
-              <div style={{ display:'flex', gap:'4rem', marginTop:'5rem', flexWrap:'wrap', paddingTop:'2.5rem', borderTop:'1px solid rgba(34,211,238,0.12)' }}>
-                {[['4.2M+','Donors Registered'],['18K+','Lives Touched'],['<6 min','Avg. Match Time']].map(([n,l]) => (
-                  <div key={l}>
-                    <div style={{
-                      fontSize:'2.5rem', fontWeight:'900', letterSpacing:'-0.02em',
-                      fontFamily: "'Playfair Display', serif",
-                      background: 'linear-gradient(135deg, #9f1239, #22d3ee)',
-                      WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text',
-                    }}>{n}</div>
-                    <div style={{ fontSize:'0.72rem', color:'rgba(148,163,184,0.7)', textTransform:'uppercase', letterSpacing:'0.12em', marginTop:'8px', fontWeight:'700' }}>{l}</div>
-                  </div>
-                ))}
-              </div>
+
             </div>
 
             {/* RIGHT — Glass Action Panel */}
             <div className="fade-up" style={{ animationDelay:'0.3s' }}>
-              <div style={{
-                background: 'rgba(255, 255, 255,0.6)',
-                backdropFilter: 'blur(24px)',
-                border: '1px solid rgba(34,211,238,0.12)',
-                borderRadius: '24px',
-                padding: '3rem',
-                boxShadow: '0 25px 60px rgba(0,0,0,0.4), inset 0 1px 0 rgba(34,211,238,0.08)',
-              }}>
-                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'2rem' }}>
-                  <div style={{ fontSize:'0.78rem', fontWeight:'800', letterSpacing:'0.12em', textTransform:'uppercase', color:'#22d3ee' }}>
-                    Live Blood Status
-                  </div>
-                  <div className="pulse-ring" style={{ width:'10px', height:'10px', borderRadius:'50%', background:'#f87171' }} />
-                </div>
-
-                <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'0.8rem', marginBottom:'2.5rem' }}>
-                  {BLOOD_GROUPS.map(bg => {
-                    const stat = stats?.stats?.find(s => s.group === bg);
-                    const lvl  = getLevel(stat?.open || 0);
-                    return (
-                      <div key={bg} onClick={() => navigate('/blood', { state: { bloodGroup: bg } })}
-                        style={{
-                          background:'rgba(225, 29, 72, 0.04)', border:'1px solid rgba(225, 29, 72, 0.18)',
-                          borderRadius:'14px', padding:'1rem 0.5rem', textAlign:'center', cursor:'pointer',
-                          transition:'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-                        }}
-                        onMouseEnter={e => { e.currentTarget.style.background='rgba(6,182,212,0.1)'; e.currentTarget.style.borderColor='rgba(34,211,238,0.3)'; e.currentTarget.style.transform='translateY(-4px)'; e.currentTarget.style.boxShadow='0 12px 24px rgba(244, 63, 94, 0.15)'; }}
-                        onMouseLeave={e => { e.currentTarget.style.background='rgba(225, 29, 72, 0.04)'; e.currentTarget.style.borderColor='rgba(225, 29, 72, 0.18)'; e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.boxShadow='none'; }}>
-                        <div style={{ fontSize:'1.3rem', fontWeight:'900', color:'#4c0519' }}>{bg}</div>
-                        <div style={{ fontSize:'0.65rem', color:lvl.color, marginTop:'6px', fontWeight:'700', textTransform:'uppercase', letterSpacing:'0.1em' }}>{lvl.label}</div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Organ pledges */}
-                <div style={{ fontSize:'0.78rem', fontWeight:'800', letterSpacing:'0.12em', textTransform:'uppercase', color:'#22d3ee', marginBottom:'1.2rem' }}>
-                  Pledge Your Organs
-                </div>
-                <div style={{ display:'flex', flexWrap:'wrap', gap:'0.7rem', marginBottom:'2.5rem' }}>
-                  {[['🫀','Heart'],['🫁','Lungs'],['🟤','Liver'],['🫘','Kidneys'],['👁️','Corneas']].map(([icon,name]) => (
-                    <span key={name} onClick={() => navigate('/organs')}
-                      style={{
-                        display:'inline-flex', alignItems:'center', gap:'8px',
-                        background:'rgba(225, 29, 72, 0.04)', border:'1px solid rgba(225, 29, 72, 0.18)',
-                        borderRadius:'999px', padding:'0.6rem 1.1rem',
-                        fontSize:'0.82rem', fontWeight:'700', color:'#881337', cursor:'pointer',
-                        transition:'all 0.3s',
-                      }}
-                      onMouseEnter={e => { e.currentTarget.style.background='rgba(139,92,246,0.15)'; e.currentTarget.style.borderColor='rgba(139,92,246,0.4)'; e.currentTarget.style.boxShadow='0 0 15px rgba(139,92,246,0.2)'; e.currentTarget.style.transform='translateY(-2px)'; }}
-                      onMouseLeave={e => { e.currentTarget.style.background='rgba(225, 29, 72, 0.04)'; e.currentTarget.style.borderColor='rgba(225, 29, 72, 0.18)'; e.currentTarget.style.boxShadow='none'; e.currentTarget.style.transform='translateY(0)'; }}>
-                      <span style={{ fontSize:'1.1rem' }}>{icon}</span> {name}
-                    </span>
-                  ))}
-                </div>
-
-                <button className="btn btn-block" style={{
-                  background: 'linear-gradient(135deg, #06b6d4 0%, #14b8a6 100%)',
-                  color: '#fff', padding:'1.3rem', fontSize:'0.95rem', fontWeight:'800',
-                  letterSpacing:'0.06em', textTransform:'uppercase', borderRadius: '14px',
-                  boxShadow: '0 0 30px rgba(6,182,212,0.25)',
-                  border: '1px solid rgba(34,211,238,0.2)',
-                }} onClick={() => navigate('/register')}>
-                  Begin Your Journey
-                </button>
-              </div>
+              <QuickDashboardWidget />
             </div>
 
           </div>

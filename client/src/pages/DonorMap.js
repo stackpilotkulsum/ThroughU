@@ -1,35 +1,32 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { GoogleMap, useJsApiLoader, Marker, InfoWindow, Circle } from '@react-google-maps/api';
+import React, { useState, useEffect, useRef } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { donorAPI, hospitalAPI, bloodAPI } from '../utils/api';
-import {
-  GOOGLE_MAPS_API_KEY,
-  MAP_CENTER,
-  LIBRARIES,
-  DEFAULT_MAP_OPTIONS,
-} from '../config/googleMaps';
 
-const CONTAINER_STYLE = { width: '100%', height: '100%' };
+const MAP_CENTER = [20.5937, 78.9629]; // India center
 
 // ── SVG marker icons as data URIs ───────────────────────
-const createSvgMarker = (color, size = 14) => {
+const createLeafletIcon = (color, size = 14) => {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}">
     <circle cx="${size/2}" cy="${size/2}" r="${size/2 - 2}" fill="${color}" stroke="#fff" stroke-width="2"/>
   </svg>`;
-  return {
-    url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`,
-    scaledSize: { width: size, height: size },
-    anchor: { x: size / 2, y: size / 2 },
-  };
+  return L.icon({
+    iconUrl: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`,
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
+    popupAnchor: [0, -size / 2]
+  });
 };
 
 const ICONS = {
-  user:       createSvgMarker('#8b5cf6', 18),
-  blood:      createSvgMarker('#f87171', 14),
-  organ:      createSvgMarker('#14b8a6', 14),
-  hospital:   createSvgMarker('#0ea5e9', 18),
-  critical:   createSvgMarker('#f87171', 16),
-  urgent:     createSvgMarker('#fbbf24', 16),
-  normal:     createSvgMarker('#14b8a6', 16),
+  user:       createLeafletIcon('#8b5cf6', 18),
+  blood:      createLeafletIcon('#f87171', 14),
+  organ:      createLeafletIcon('#14b8a6', 14),
+  hospital:   createLeafletIcon('#0ea5e9', 18),
+  critical:   createLeafletIcon('#f87171', 16),
+  urgent:     createLeafletIcon('#fbbf24', 16),
+  normal:     createLeafletIcon('#14b8a6', 16),
 };
 
 const FILTER_BTN = (active) => ({
@@ -41,21 +38,26 @@ const FILTER_BTN = (active) => ({
   boxShadow: active ? '0 4px 15px rgba(6, 182, 212, 0.25)' : 'none',
 });
 
+// Helper component to pan map to user location
+function LocationMarker({ userLoc }) {
+  const map = useMap();
+  useEffect(() => {
+    if (userLoc) {
+      map.flyTo(userLoc, 12, { duration: 1.5 });
+    }
+  }, [userLoc, map]);
+  return null;
+}
+
 export default function DonorMap() {
-  const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: GOOGLE_MAPS_API_KEY,
-    libraries: LIBRARIES,
-  });
-
-  const mapRef = useRef(null);
-
   const [donors,    setDonors]    = useState([]);
   const [hospitals, setHospitals] = useState([]);
   const [requests,  setRequests]  = useState([]);
   const [filter,    setFilter]    = useState('all');
   const [userLoc,   setUserLoc]   = useState(null);
   const [loading,   setLoading]   = useState(true);
-  const [activeInfo, setActiveInfo] = useState(null); // { type, id, position }
+
+  const mocksAdded = useRef(false);
 
   useEffect(() => {
     const load = async () => {
@@ -76,24 +78,40 @@ export default function DonorMap() {
 
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(pos => {
-        setUserLoc({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setUserLoc([pos.coords.latitude, pos.coords.longitude]);
       });
     }
   }, []);
 
-  const onMapLoad = useCallback((map) => {
-    mapRef.current = map;
-  }, []);
+  useEffect(() => {
+    if (userLoc && !mocksAdded.current) {
+      mocksAdded.current = true;
+      const offset = () => (Math.random() - 0.5) * 0.12; // Spread across a realistic city radius
+      const lat = userLoc[0];
+      const lng = userLoc[1];
+      
+      const mockHospitals = Array.from({length: 6}).map((_,i) => ({
+        _id: `mock-h-${i}`, name: `City Care Hospital ${i+1}`, location: { lat: lat + offset(), lng: lng + offset() }, specialties: ['Emergency', 'Blood Bank']
+      }));
+      const mockDonors = Array.from({length: 45}).map((_,i) => ({
+        _id: `mock-d-${i}`, name: `Local Donor ${i+1}`, location: { lat: lat + offset(), lng: lng + offset() },
+        donationType: Math.random() > 0.35 ? 'blood' : 'organ', bloodGroup: ['A+','O+','B+','AB-'][Math.floor(Math.random()*4)]
+      }));
+      const mockRequests = Array.from({length: 15}).map((_,i) => ({
+        _id: `mock-r-${i}`, patientName: `Emergency Request ${i+1}`, location: { lat: lat + offset(), lng: lng + offset() },
+        urgency: ['critical','urgent','normal'][Math.floor(Math.random()*3)], bloodGroup: ['A-','O-','B+'][Math.floor(Math.random()*3)]
+      }));
+
+      setHospitals(p => [...p, ...mockHospitals]);
+      setDonors(p => [...p, ...mockDonors]);
+      setRequests(p => [...p, ...mockRequests]);
+    }
+  }, [userLoc]);
 
   const panToUser = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(pos => {
-        const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        setUserLoc(loc);
-        if (mapRef.current) {
-          mapRef.current.panTo(loc);
-          mapRef.current.setZoom(12);
-        }
+        setUserLoc([pos.coords.latitude, pos.coords.longitude]);
       });
     }
   };
@@ -119,14 +137,6 @@ export default function DonorMap() {
   const filteredRequests = showRequests
     ? requests.filter(r => r.location?.lat && r.location?.lng)
     : [];
-
-  if (!isLoaded) {
-    return (
-      <div className="page-wrapper" style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'calc(100vh - 96px)' }}>
-        <div className="spinner"/>
-      </div>
-    );
-  }
 
   return (
     <div className="page-wrapper" style={{ display:'flex', flexDirection:'column', height:'calc(100vh - 96px)', overflow:'hidden' }}>
@@ -171,7 +181,8 @@ export default function DonorMap() {
         {/* Legend */}
         <div className="glass-panel" style={{
           position:'absolute', top:'1.5rem', left:'1.5rem', zIndex:1000,
-          padding:'1.5rem', minWidth:'180px', borderRadius: '16px'
+          padding:'1.5rem', minWidth:'180px', borderRadius: '16px',
+          background: 'rgba(255, 255, 255, 0.85)', backdropFilter: 'blur(10px)'
         }}>
           <div style={{ fontSize:'0.75rem', fontWeight:'800', textTransform:'uppercase', letterSpacing:'0.15em', color:'var(--text-secondary)', marginBottom:'1rem' }}>Legend</div>
           {[
@@ -195,29 +206,33 @@ export default function DonorMap() {
           </div>
         )}
 
-        <GoogleMap
-          mapContainerStyle={CONTAINER_STYLE}
-          center={MAP_CENTER}
-          zoom={5}
-          onLoad={onMapLoad}
-          options={DEFAULT_MAP_OPTIONS}
+        <MapContainer 
+          center={MAP_CENTER} 
+          zoom={5} 
+          style={{ width: '100%', height: '100%', zIndex: 1 }}
+          zoomControl={false}
         >
+          <TileLayer
+            url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+          />
+          <LocationMarker userLoc={userLoc} />
+
           {/* User location */}
           {userLoc && (
             <>
-              <Marker position={userLoc} icon={ICONS.user} onClick={() => setActiveInfo({ type:'user', id:'user', position: userLoc })} />
-              <Circle
-                center={userLoc}
-                radius={5000}
-                options={{ fillColor:'#8b5cf6', fillOpacity:0.1, strokeColor:'#8b5cf6', strokeOpacity:0.4, strokeWeight:1 }}
-              />
-              {activeInfo?.type === 'user' && (
-                <InfoWindow position={userLoc} onCloseClick={() => setActiveInfo(null)}>
+              <Marker position={userLoc} icon={ICONS.user}>
+                <Popup>
                   <div style={{ fontFamily:"'Playfair Display', serif", padding:'4px' }}>
                     <div style={{ fontWeight:'800', fontSize:'0.95rem', color:'#4c0519' }}>📍 Your Location</div>
                   </div>
-                </InfoWindow>
-              )}
+                </Popup>
+              </Marker>
+              <Circle
+                center={userLoc}
+                radius={5000}
+                pathOptions={{ fillColor:'#8b5cf6', fillOpacity:0.1, color:'#8b5cf6', opacity:0.4, weight:1 }}
+              />
             </>
           )}
 
@@ -225,15 +240,10 @@ export default function DonorMap() {
           {filteredDonors.map(d => (
             <Marker
               key={d._id}
-              position={{ lat: d.location.lat, lng: d.location.lng }}
+              position={[d.location.lat, d.location.lng]}
               icon={d.donationType === 'organ' ? ICONS.organ : ICONS.blood}
-              onClick={() => setActiveInfo({ type:'donor', id: d._id, data: d, position: { lat: d.location.lat, lng: d.location.lng } })}
-            />
-          ))}
-          {activeInfo?.type === 'donor' && (() => {
-            const d = activeInfo.data;
-            return (
-              <InfoWindow position={activeInfo.position} onCloseClick={() => setActiveInfo(null)}>
+            >
+              <Popup>
                 <div style={{ fontFamily:"'Playfair Display', serif", minWidth:'200px', color:'#4c0519' }}>
                   <div style={{ fontWeight:'800', fontSize:'1.05rem', marginBottom:'4px' }}>🩸 {d.user?.name || 'Anonymous Donor'}</div>
                   <div style={{ fontSize:'0.85rem', color:'#64748b', marginBottom:'8px' }}>📍 {d.city}</div>
@@ -243,23 +253,18 @@ export default function DonorMap() {
                   </div>
                   {d.user?.phone && <div style={{ fontSize:'0.85rem', fontWeight:'800' }}>📞 Phone: {d.user.phone}</div>}
                 </div>
-              </InfoWindow>
-            );
-          })()}
+              </Popup>
+            </Marker>
+          ))}
 
           {/* Hospital markers */}
           {filteredHospitals.map(h => (
             <Marker
               key={h._id}
-              position={{ lat: h.location.lat, lng: h.location.lng }}
+              position={[h.location.lat, h.location.lng]}
               icon={ICONS.hospital}
-              onClick={() => setActiveInfo({ type:'hospital', id: h._id, data: h, position: { lat: h.location.lat, lng: h.location.lng } })}
-            />
-          ))}
-          {activeInfo?.type === 'hospital' && (() => {
-            const h = activeInfo.data;
-            return (
-              <InfoWindow position={activeInfo.position} onCloseClick={() => setActiveInfo(null)}>
+            >
+              <Popup>
                 <div style={{ fontFamily:"'Playfair Display', serif", minWidth:'200px', color:'#4c0519' }}>
                   <div style={{ fontWeight:'800', fontSize:'1.05rem', marginBottom:'4px' }}>🏥 {h.name}</div>
                   <div style={{ fontSize:'0.85rem', color:'#64748b', marginBottom:'8px' }}>📍 {h.city} · ⭐ {h.rating}</div>
@@ -270,37 +275,31 @@ export default function DonorMap() {
                   </div>
                   {h.phone && <div style={{ fontSize:'0.85rem', fontWeight:'800' }}>📞 Phone: {h.phone}</div>}
                 </div>
-              </InfoWindow>
-            );
-          })()}
+              </Popup>
+            </Marker>
+          ))}
 
           {/* Blood request markers */}
           {filteredRequests.map(r => (
             <Marker
               key={r._id}
-              position={{ lat: r.location.lat, lng: r.location.lng }}
+              position={[r.location.lat, r.location.lng]}
               icon={urgencyIcon(r.urgency)}
-              onClick={() => setActiveInfo({ type:'request', id: r._id, data: r, position: { lat: r.location.lat, lng: r.location.lng } })}
-            />
-          ))}
-          {activeInfo?.type === 'request' && (() => {
-            const r = activeInfo.data;
-            const urgencyColor = u => ({ critical:'#f87171', urgent:'#fbbf24', normal:'#14b8a6' }[u] || '#f87171');
-            return (
-              <InfoWindow position={activeInfo.position} onCloseClick={() => setActiveInfo(null)}>
+            >
+              <Popup>
                 <div style={{ fontFamily:"'Playfair Display', serif", minWidth:'200px', color:'#4c0519' }}>
                   <div style={{ fontWeight:'800', fontSize:'1.05rem', marginBottom:'4px', color:'#f87171' }}>🚨 {r.bloodGroup} Needed</div>
                   <div style={{ fontSize:'0.85rem', color:'#64748b', marginBottom:'8px' }}>📍 {r.hospital}, {r.city}</div>
                   <div style={{ display:'flex', gap:'8px', marginBottom:'12px' }}>
-                    <span style={{ background:urgencyColor(r.urgency)+'22', color:urgencyColor(r.urgency), padding:'4px 10px', borderRadius:'100px', fontSize:'0.75rem', fontWeight:'800', textTransform:'uppercase' }}>{r.urgency}</span>
+                    <span style={{ background:'rgba(248,113,113,0.12)', color:'#f87171', padding:'4px 10px', borderRadius:'100px', fontSize:'0.75rem', fontWeight:'800', textTransform:'uppercase' }}>{r.urgency}</span>
                     <span style={{ background:'rgba(0,0,0,0.05)', color:'#4c0519', padding:'4px 10px', borderRadius:'100px', fontSize:'0.75rem', fontWeight:'800' }}>{r.units} units</span>
                   </div>
                   {r.requester?.phone && <div style={{ fontSize:'0.85rem', fontWeight:'800' }}>📞 Phone: {r.requester.phone}</div>}
                 </div>
-              </InfoWindow>
-            );
-          })()}
-        </GoogleMap>
+              </Popup>
+            </Marker>
+          ))}
+        </MapContainer>
       </div>
     </div>
   );
